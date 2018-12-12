@@ -1,0 +1,15 @@
+Alignment Parameters
+
+Assume that As Filled is the "base" coordinate system
+
+Coordinates are in mm
+
+Device 6G
+
+Region 1
+
+Alignment Point: High point on large post
+
+AsFilled: [-0.205, 4.045]
+AGWRinse: [-0.18, 4.04], Displacement: [+0.025,-0.005]
+SFlush: [-0.165, 4.035], Displacement: [+0.040, -0.01]
