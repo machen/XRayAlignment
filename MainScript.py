@@ -4,6 +4,17 @@ import os
 import re
 import matplotlib.pyplot as plt
 
+
+def subSelect(data, xmin, xmax, ymin, ymax):
+    """Takes dataFrame with X and Y columns, and sub-selects so that it only
+     contains coordinates in the specified x/y ranges"""
+    res = data.loc[(data.loc[:, 'X'] > xmin) & (data.loc[:, 'X'] < xmax), :]
+    res = res.loc[(data.loc[:, 'Y'] > ymin) & (data.loc[:, 'Y'] < ymax), :]
+    return res
+
+
+plt.ion()
+
 # Step 1: Select the files from the region that we want to examine
 
 dataFileLocation = """C:\\Users\\Michael\\OneDrive\\Archive\\MIT Grad School Research Overflow\\Microfluidics\\NSLS-II Data\\Kocar_NSLS-II_October15_2018_EndOfRun\\01010_Kocar\\Maps\\Exported Data\\Device 6G Normalized by I0\\"""
@@ -40,7 +51,7 @@ sulfideData.loc[:, "Y"] = sulfideData.loc[:, "Y"]+sulfideAdjust[1]
 # sulfideData = sulfideData.loc[:, ["X", "Y", "Intensity"]].values
 
 
-# Calculate differences THIS NEEDS TO RUN FASTER MAYBE
+# Calculate differences: current method iterates over all of the available points
 
 differenceMat = []
 for i in fillingData.index:
@@ -76,29 +87,59 @@ for i in fillingData.index:
     else:
         raise ValueError('Non-unique results during coordinate search')
     differenceMat.append([X, Y, rinseIntensity - fillIntensity,
-                          sulfideIntensity - rinseIntensity, element])
+                          sulfideIntensity - rinseIntensity, element,
+                          fillIntensity, rinseIntensity, sulfideIntensity])
     print(i)
+
+# An alternate method would be to select out the ranges that have the same values, and align them
+
+# Pick map region that aligns everything
+
+xmin = max([min(fillingData.loc[:, 'X']), min(rinseData.loc[:, 'X']),
+            min(sulfideData.loc[:, 'X'])])
+xmax = min([max(fillingData.loc[:, 'X']), max(rinseData.loc[:, 'X']),
+            max(sulfideData.loc[:, 'X'])])
+
+ymin = max([min(fillingData.loc[:, 'Y']), min(rinseData.loc[:, 'Y']),
+            min(sulfideData.loc[:, 'Y'])])
+ymax = min([max(fillingData.loc[:, 'Y']), max(rinseData.loc[:, 'Y']),
+            max(sulfideData.loc[:, 'Y'])])
+
+# # Filter filling data to obtain X, Y, fillingInt coordinates
+
+# subData = subSelect(fillingData, xmin, xmax, ymin, ymax)
+# xVals = subData.loc[:, 'X']
+# yVals = subData.loc[:, 'Y']
+# fillingInt = subData.loc[:, 'Intensity']
+
+# subData = subSelect(data, xmin, xmax, ymin, ymax)
 
 # Difference is a list of X, Y coordinates (rounded to the nearest micron), and the corresponding difference values
 
 difference = pd.DataFrame(differenceMat, columns=["X", "Y", "FillingRinse",
-                          "RinseSulfide", "Element"])
+                          "RinseSulfide", "Element", "FillInt", "RinseInt",
+                          "SulfideInt"])
 
 # Plot the differences by element/time points
 
 mapSize = [len(difference.loc[:, "Y"].unique()),
            len(difference.loc[:, "X"].unique())]
 
-# Arsenic plots
-subData = difference.loc[difference.loc[:, "Element"] == 'As', :]
-asMap = subData.loc[:, 'FillingRinse'].reshape(mapSize)
-f1 = plt.figure(1)
-plt.imshow(asMap, cmap='RdBu')
-plt.title("Difference between AGW Rinse and As Filling")
-plt.colorbar()
+availableElements = difference.loc[:, "Element"].unique()
 
-asMap = subData.loc[:, 'RinseSulfide'].reshape(mapSize)
-f2 = plt.figure(2)
-plt.imshow(asMap, cmap='RdBu')
-plt.title("Difference between Sulfide Rinse and AGW Filling")
-plt.colorbar()
+for i in range(0, len(availableElements)):
+    ele = availableElements[i]
+    # Arsenic plots
+    subData = difference.loc[difference.loc[:, "Element"] == ele, :]
+    asMap = subData.loc[:, 'FillingRinse'].values.reshape(mapSize)
+    f1 = plt.figure(2*i+1)
+    plt.imshow(asMap, cmap='RdBu', vmin=-0.003, vmax=0.003)
+    plt.title("Difference between AGW Rinse and As Filling: {}".format(ele))
+    plt.colorbar()
+
+    asMap = subData.loc[:, 'RinseSulfide'].values.reshape(mapSize)
+    f2 = plt.figure(2*i+2)
+    plt.imshow(asMap, cmap='RdBu', vmin=-0.003, vmax=0.003)
+    plt.title("Difference between Sulfide Rinse and AGW Filling {}".format(ele))
+    plt.colorbar()
+
