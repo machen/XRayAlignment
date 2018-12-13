@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import os
 import re
+import matplotlib.pyplot as plt
 
 # Step 1: Select the files from the region that we want to examine
 
@@ -39,7 +40,7 @@ sulfideData.loc[:, "Y"] = sulfideData.loc[:, "Y"]+sulfideAdjust[1]
 # sulfideData = sulfideData.loc[:, ["X", "Y", "Intensity"]].values
 
 
-# Calculate differences
+# Calculate differences THIS NEEDS TO RUN FASTER MAYBE
 
 differenceMat = []
 for i in fillingData.index:
@@ -77,5 +78,27 @@ for i in fillingData.index:
     differenceMat.append([X, Y, rinseIntensity - fillIntensity,
                           sulfideIntensity - rinseIntensity, element])
     print(i)
+
+# Difference is a list of X, Y coordinates (rounded to the nearest micron), and the corresponding difference values
+
 difference = pd.DataFrame(differenceMat, columns=["X", "Y", "FillingRinse",
-                          "RinseSulfide", "element"])
+                          "RinseSulfide", "Element"])
+
+# Plot the differences by element/time points
+
+mapSize = [len(difference.loc[:, "Y"].unique()),
+           len(difference.loc[:, "X"].unique())]
+
+# Arsenic plots
+subData = difference.loc[difference.loc[:, "Element"] == 'As', :]
+asMap = subData.loc[:, 'FillingRinse'].reshape(mapSize)
+f1 = plt.figure(1)
+plt.imshow(asMap, cmap='RdBu')
+plt.title("Difference between AGW Rinse and As Filling")
+plt.colorbar()
+
+asMap = subData.loc[:, 'RinseSulfide'].reshape(mapSize)
+f2 = plt.figure(2)
+plt.imshow(asMap, cmap='RdBu')
+plt.title("Difference between Sulfide Rinse and AGW Filling")
+plt.colorbar()
