@@ -10,6 +10,8 @@ def subSelect(data, xmin, xmax, ymin, ymax):
      contains coordinates in the specified x/y ranges"""
     res = data.loc[(data.loc[:, 'X'] > xmin) & (data.loc[:, 'X'] < xmax), :]
     res = res.loc[(data.loc[:, 'Y'] > ymin) & (data.loc[:, 'Y'] < ymax), :]
+    res = res.sort_values(by=['Element', 'X', 'Y'])
+    # Think there should be a line to force sorting of the matrix (ie x then y)
     return res
 
 
@@ -18,9 +20,9 @@ plt.ion()
 # Step 1: Select the files from the region that we want to examine
 
 dataFileLocation = """C:\\Users\\Michael\\OneDrive\\Archive\\MIT Grad School Research Overflow\\Microfluidics\\NSLS-II Data\\Kocar_NSLS-II_October15_2018_EndOfRun\\01010_Kocar\\Maps\\Exported Data\\Device 6G Normalized by I0\\"""
-region = "Region1"  # CHANGE THIS
-rinseAdjust = [0.025, -0.005]  # Adjustment to align AGWRinse with AsFilled [x, y] in mm
-sulfideAdjust = [0.040, -0.01]  # Adjustment to align SulfideFlush with AsFilled
+region = "Region2"  # CHANGE THIS
+rinseAdjust = [-0.03, 0.01]  # Adjustment to align AGWRinse with AsFilled [x, y] in mm
+sulfideAdjust = [-0.045, 0.01]  # Adjustment to align SulfideFlush with AsFilled
 timePoints = ["AGWRinse", "AsFilled", "SFlush"]
 availableFiles = os.listdir(dataFileLocation)
 data = pd.DataFrame(columns=["Time Point", "Element", "X", "Y", "Intensity"])
@@ -91,28 +93,38 @@ for i in fillingData.index:
                           fillIntensity, rinseIntensity, sulfideIntensity])
     print(i)
 
-# An alternate method would be to select out the ranges that have the same values, and align them
+# An alternate method would be to select out the ranges that have the same values, and align them.
+
+# Data does not appear to be well behaved enough to work
 
 # Pick map region that aligns everything
 
-xmin = max([min(fillingData.loc[:, 'X']), min(rinseData.loc[:, 'X']),
-            min(sulfideData.loc[:, 'X'])])
-xmax = min([max(fillingData.loc[:, 'X']), max(rinseData.loc[:, 'X']),
-            max(sulfideData.loc[:, 'X'])])
+# xmin = max([min(fillingData.loc[:, 'X']), min(rinseData.loc[:, 'X']),
+#             min(sulfideData.loc[:, 'X'])])
+# xmax = min([max(fillingData.loc[:, 'X']), max(rinseData.loc[:, 'X']),
+#             max(sulfideData.loc[:, 'X'])])
 
-ymin = max([min(fillingData.loc[:, 'Y']), min(rinseData.loc[:, 'Y']),
-            min(sulfideData.loc[:, 'Y'])])
-ymax = min([max(fillingData.loc[:, 'Y']), max(rinseData.loc[:, 'Y']),
-            max(sulfideData.loc[:, 'Y'])])
+# ymin = max([min(fillingData.loc[:, 'Y']), min(rinseData.loc[:, 'Y']),
+#             min(sulfideData.loc[:, 'Y'])])
+# ymax = min([max(fillingData.loc[:, 'Y']), max(rinseData.loc[:, 'Y']),
+#             max(sulfideData.loc[:, 'Y'])])
 
-# # Filter filling data to obtain X, Y, fillingInt coordinates
+# # # Filter filling data to obtain X, Y, fillingInt coordinates
 
 # subData = subSelect(fillingData, xmin, xmax, ymin, ymax)
-# xVals = subData.loc[:, 'X']
-# yVals = subData.loc[:, 'Y']
-# fillingInt = subData.loc[:, 'Intensity']
+# xVals = subData.loc[:, 'X'].values
+# yVals = subData.loc[:, 'Y'].values
+# elements = subData.loc[:, 'Element'].values
+# fillingInt = subData.loc[:, 'Intensity'].values
 
-# subData = subSelect(data, xmin, xmax, ymin, ymax)
+# subData = subSelect(rinseData, xmin, xmax, ymin, ymax)
+# rinseInt = subData.loc[:, 'Intensity'].values
+
+# subData = subSelect(sulfideData, xmin, xmax, ymin, ymax)
+# sulfideInt = subData.loc[:, 'Intensity'].values
+
+# differenceMat = [xVals, yVals, rinseInt-fillingInt, sulfideInt-rinseInt,
+#                  elements, fillingInt, rinseInt, sulfideInt]
 
 # Difference is a list of X, Y coordinates (rounded to the nearest micron), and the corresponding difference values
 
@@ -140,6 +152,6 @@ for i in range(0, len(availableElements)):
     asMap = subData.loc[:, 'RinseSulfide'].values.reshape(mapSize)
     f2 = plt.figure(2*i+2)
     plt.imshow(asMap, cmap='RdBu', vmin=-0.003, vmax=0.003)
-    plt.title("Difference between Sulfide Rinse and AGW Filling {}".format(ele))
+    plt.title("Difference between Sulfide Rinse and AGW Rinse: {}".format(ele))
     plt.colorbar()
 
