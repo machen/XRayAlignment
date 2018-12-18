@@ -27,6 +27,10 @@ timePoints = ["AGWRinse", "AsFilled", "SFlush"]
 availableFiles = os.listdir(dataFileLocation)
 data = pd.DataFrame(columns=["Time Point", "Element", "X", "Y", "Intensity"])
 
+# Better option would be to have data pre set up in matrices, or write a method that auto converts a list to a matrix and vice versa
+
+#Also how do multi-indexes work? That seems like something that might work...
+
 for timePoint in timePoints:
     # Selects for files that match the region and timepoint of interest
     filePat = re.compile(".*_("+timePoint+")_("+region+")_.*_(\D{2})_Ka.dat")
@@ -51,47 +55,6 @@ sulfideData = data.loc[data.loc[:, "Time Point"] == "SFlush", :]
 sulfideData.loc[:, "X"] = sulfideData.loc[:, "X"]+sulfideAdjust[0]
 sulfideData.loc[:, "Y"] = sulfideData.loc[:, "Y"]+sulfideAdjust[1]
 # sulfideData = sulfideData.loc[:, ["X", "Y", "Intensity"]].values
-
-
-# Calculate differences: current method iterates over all of the available points
-
-differenceMat = []
-for i in fillingData.index:
-    X = fillingData.loc[i, "X"]
-    Y = fillingData.loc[i, "Y"]
-    element = fillingData.loc[i, "Element"]
-    fillIntensity = fillingData.loc[i, "Intensity"]
-    # Calculate Filling Minus Rinse, first select for the coordinate
-    subData = rinseData.loc[rinseData.loc[:, "Element"] == element, :]
-    subData = subData.loc[(abs(subData.loc[:,
-                          'X']-X) < 0.0001) & (abs(subData.loc[:,
-                          'Y']-Y) < 0.0001), :]
-    point = subData.index
-    res = len(subData)
-    # Test to make sure we have the correct amount
-    if res == 1:
-        rinseIntensity = float(subData.loc[point, "Intensity"])
-    elif res == 0:
-        continue
-    else:
-        raise ValueError('Non-unique results during coordinate search')
-
-    subData = sulfideData.loc[sulfideData.loc[:, "Element"] == element, :]
-    subData = subData.loc[(abs(subData.loc[:,
-                               'X']-X) < 0.0001) & (abs(subData.loc[:,
-                               'Y']-Y) < 0.0001), :]
-    point = subData.index
-    res = len(subData)
-    if res == 1:
-        sulfideIntensity = float(subData.loc[point, "Intensity"])
-    elif res == 0:
-        continue
-    else:
-        raise ValueError('Non-unique results during coordinate search')
-    differenceMat.append([X, Y, rinseIntensity - fillIntensity,
-                          sulfideIntensity - rinseIntensity, element,
-                          fillIntensity, rinseIntensity, sulfideIntensity])
-    print(i)
 
 # An alternate method would be to select out the ranges that have the same values, and align them.
 
