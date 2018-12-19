@@ -20,9 +20,9 @@ plt.ion()
 # Step 1: Select the files from the region that we want to examine
 
 dataFileLocation = """C:\\Users\\Michael\\OneDrive\\Archive\\MIT Grad School Research Overflow\\Microfluidics\\NSLS-II Data\\Kocar_NSLS-II_October15_2018_EndOfRun\\01010_Kocar\\Maps\\Exported Data\\Device 6G Normalized by I0\\"""
-region = "Region2"  # CHANGE THIS
-rinseAdjust = [-0.03, 0.01]  # Adjustment to align AGWRinse with AsFilled [x, y] in mm
-sulfideAdjust = [-0.045, 0.01]  # Adjustment to align SulfideFlush with AsFilled
+region = "Region4"  # CHANGE THIS
+rinseAdjust = [0.03, -0.005]  # Adjustment to align AGWRinse with AsFilled [x, y] in mm
+sulfideAdjust = [0.04, -0.01]  # Adjustment to align SulfideFlush with AsFilled
 timePoints = ["AGWRinse", "AsFilled", "SFlush"]
 availableFiles = os.listdir(dataFileLocation)
 data = pd.DataFrame(columns=["Time Point", "Element", "X", "Y", "Intensity"])
@@ -44,12 +44,12 @@ data = data.round({'X': 3, 'Y': 3})
 fillingData = data.loc[data.loc[:, "Time Point"] == "AsFilled", :]
 # fillingData = fillingData.loc[:, ["X", "Y", "Intensity"]].values
 rinseData = data.loc[data.loc[:, "Time Point"] == "AGWRinse", :]
-rinseData.loc[:, "X"] = rinseData.loc[:, "X"]+rinseAdjust[0]
-rinseData.loc[:, "Y"] = rinseData.loc[:, "Y"]+rinseAdjust[1]
+rinseData.loc[:, "X"] = rinseData.loc[:, "X"]-rinseAdjust[0]
+rinseData.loc[:, "Y"] = rinseData.loc[:, "Y"]-rinseAdjust[1]
 # rinseData = rinseData.loc[:, ["X", "Y", "Intensity"]].values
 sulfideData = data.loc[data.loc[:, "Time Point"] == "SFlush", :]
-sulfideData.loc[:, "X"] = sulfideData.loc[:, "X"]+sulfideAdjust[0]
-sulfideData.loc[:, "Y"] = sulfideData.loc[:, "Y"]+sulfideAdjust[1]
+sulfideData.loc[:, "X"] = sulfideData.loc[:, "X"]-sulfideAdjust[0]
+sulfideData.loc[:, "Y"] = sulfideData.loc[:, "Y"]-sulfideAdjust[1]
 # sulfideData = sulfideData.loc[:, ["X", "Y", "Intensity"]].values
 
 
@@ -91,7 +91,7 @@ for i in fillingData.index:
     differenceMat.append([X, Y, rinseIntensity - fillIntensity,
                           sulfideIntensity - rinseIntensity, element,
                           fillIntensity, rinseIntensity, sulfideIntensity])
-    print(i)
+    print([X, Y, element])
 
 # An alternate method would be to select out the ranges that have the same values, and align them.
 
@@ -145,13 +145,13 @@ for i in range(0, len(availableElements)):
     subData = difference.loc[difference.loc[:, "Element"] == ele, :]
     asMap = subData.loc[:, 'FillingRinse'].values.reshape(mapSize)
     f1 = plt.figure(2*i+1)
-    plt.imshow(asMap, cmap='RdBu', vmin=-0.003, vmax=0.003)
+    plt.imshow(asMap, cmap='RdBu', vmin=-0.001, vmax=0.001)
     plt.title("Difference between AGW Rinse and As Filling: {}".format(ele))
     plt.colorbar()
 
     asMap = subData.loc[:, 'RinseSulfide'].values.reshape(mapSize)
     f2 = plt.figure(2*i+2)
-    plt.imshow(asMap, cmap='RdBu', vmin=-0.003, vmax=0.003)
+    plt.imshow(asMap, cmap='RdBu', vmin=-0.001, vmax=0.001)
     plt.title("Difference between Sulfide Rinse and AGW Rinse: {}".format(ele))
     plt.colorbar()
 

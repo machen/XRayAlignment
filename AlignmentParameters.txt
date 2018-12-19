@@ -14,12 +14,36 @@ AsFilled: [-0.205, 4.045]
 AGWRinse: [-0.18, 4.04], Displacement: [+0.025,-0.005]
 SFlush: [-0.165, 4.035], Displacement: [+0.040, -0.01]
 
+AsFilled is larger, which is causing some issues
+
 Region 2
 
 Alignment point: Top point of the complete post, darker part of bright region
 
 AsFilled: [0.705, 1.325]
 AGWRinse: [0.735, 1.315], Displacement: [0.03, -0.01]
-SFlush: [0.75, 1.315], Displacement: [0.045, -0.01]
+SFlush: [0.75, 1.315], Displacement: [0.045, -0.015]
 
+Region 3
 
+Alignment Point: Point at 4 o' clock (4 pixels), top right pixel
+
+AsFilled: [-2.46, -0.52]
+AGWRinse: [-2.43, -0.525], Displacement: [0.03, -0.005]
+SFlush: [-2.415, -0.53], Displacement: [0.045, -0.01]
+
+Region 4
+
+Alignment point: Far right bright spot in the As map
+
+As Filled: [2.94, 1.21]
+AGW Rinse: [2.97, 1.205]
+SFlush: [2.98, 1.2]
+
+Region 5
+
+Alignment point: Bottom bright spot, Fe map
+
+AsFilled: [-1.91, 3.55]
+AGW Rinse: [-1.885, 3.545], displacement: [0.025, -0.01]
+SFlush: [-1.87, 3.54], displacement: [0.04, -0.015]
