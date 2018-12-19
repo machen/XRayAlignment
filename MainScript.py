@@ -5,6 +5,36 @@ import re
 import matplotlib.pyplot as plt
 
 
+class dataMap():
+    def __init__(self, inputData, element, timePoint):
+        """Input data format:
+        Example for a 3,2 map
+        Y X Intensity
+        yVal1 xVal1 intVal1
+        yVal1 xVal2 intVal2
+        yVal2 xVal1 intVal3
+        yVal2 xVal2 intVal4
+        yVal3 xVal2 intVal5
+        yVal3 xVal2 intVal6
+
+        Might be worthwhile to set it up so that the matrix comes pre sorted
+        """
+        self.mapDim = [0, 0]
+        xData = inputData[0]
+        xSmooth = np.round(xData, decimals=3)  # Smooth data to micron accuracy
+        self.mapDim[1] = len(xSmooth.unique())
+        yData = inputData[1]
+        ySmooth = np.round(yData, decimals=3)  # Smooth data to micron accuracy
+        intData = inputData[2]
+        self.mapDim[0] = len(ySmooth.unique())
+        self.intensities = np.reshape(intData, newshape=self.mapDim)
+        self.x = np.reshape(xSmooth, newshape=self.mapDim, order='C')
+        self.y = np.reshape(ySmooth, newshape=self.mapDim, order='C')
+        self.element = element
+        self.timePoint = timePoint
+
+
+
 def subSelect(data, xmin, xmax, ymin, ymax):
     """Takes dataFrame with X and Y columns, and sub-selects so that it only
      contains coordinates in the specified x/y ranges"""
