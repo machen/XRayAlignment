@@ -16,10 +16,9 @@ class dataMap():
         yVal2 xVal2 intVal4
         yVal3 xVal2 intVal5
         yVal3 xVal2 intVal6
-
-        Might be worthwhile to set it up so that the matrix comes pre sorted
         """
-        self.data = pd.DataFrame(inputData, columns=['Y','X','Intensity'])
+        self.data = pd.DataFrame(inputData, columns=['Y', 'X', 'Intensity'])
+        self.data = self.data.sort_values(by=['Y',  'X'])
         self.mapDim = [0, 0]
         xData = inputData[0]
         xSmooth = np.round(xData, decimals=3)  # Smooth data to micron accuracy
@@ -28,11 +27,15 @@ class dataMap():
         ySmooth = np.round(yData, decimals=3)  # Smooth data to micron accuracy
         intData = inputData[2]
         self.mapDim[0] = len(ySmooth.unique())
-        self.intensities = np.reshape(intData, newshape=self.mapDim, order='C')
-        self.x = np.reshape(xSmooth, newshape=self.mapDim, order='C')
-        self.y = np.reshape(ySmooth, newshape=self.mapDim, order='C')
+        self.intensities = pd.DataFrame(np.reshape(intData, newshape=self.mapDim, order='C'))
+        self.x = pd.DataFrame(np.reshape(xSmooth, newshape=self.mapDim, order='C'))
+        self.y = pd.DataFrame(np.reshape(ySmooth, newshape=self.mapDim, order='C'))
         self.element = element
         self.timePoint = timePoint
+
+    def subSelection(self, xmin, xmax, ymin, ymax):
+        """Function should sub-select the intensity, x, and y matrices"""
+        return xRes, yRes, intRes
 
     def getX(self):
         return self.x
