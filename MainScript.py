@@ -140,8 +140,23 @@ for element in data['SFlush']:
     data['SFlush'][element].mapShift(sulfideAdjust)
 
 # Generate the relevant difference maps
+i = 0
 
 for element in data['AsFilled']:
     fillData = data['AsFilled'][element]
-    rinseData = data['AGWRinse'][element]
-    sulfideData = data['SFlush'][element]
+    try:
+        rinseData = data['AGWRinse'][element]
+        rinseDiffX, rinseDiffY, rinseDiffInt = mapSubtract(rinseData, fillData)
+        # PLOT THE DIFFERNCES LABEL THE FIGURE
+        # MAYBE STATS ON THE FIGURES AS WELL
+    except KeyError:
+        # DO NOT CALCULATE
+        pass
+    try:
+        sulfideData = data['SFlush'][element]
+        sulfideDiffX, sulfideDiffY, sulfideDiffInt = mapSubtract(sulfideData,
+                                                                 rinseData)
+        # PLOT THE DIFFERENCES LABEL THE FIGURE
+        # MAYBE STATS ON THE FIGURES AS WELL
+    except KeyError:
+        pass
