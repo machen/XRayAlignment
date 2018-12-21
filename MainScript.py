@@ -27,14 +27,24 @@ class dataMap():
         ySmooth = np.round(yData, decimals=3)  # Smooth data to micron accuracy
         intData = inputData[2]
         self.mapDim[0] = len(ySmooth.unique())
-        self.intensities = pd.DataFrame(np.reshape(intData, newshape=self.mapDim, order='C'))
-        self.x = pd.DataFrame(np.reshape(xSmooth, newshape=self.mapDim, order='C'))
-        self.y = pd.DataFrame(np.reshape(ySmooth, newshape=self.mapDim, order='C'))
+        self.intensities = pd.DataFrame(np.reshape(intData,
+                                        newshape=self.mapDim, order='C'))
+        self.x = pd.DataFrame(np.reshape(xSmooth, newshape=self.mapDim,
+                                         order='C'))
+        self.y = pd.DataFrame(np.reshape(ySmooth, newshape=self.mapDim,
+                                         order='C'))
         self.element = element
         self.timePoint = timePoint
 
-    def subSelection(self, xmin, xmax, ymin, ymax):
+    def subSelect(self, xmin, xmax, ymin, ymax):
         """Function should sub-select the intensity, x, and y matrices"""
+        xSection = self.x.loc[0, (self.x.loc[0, :] > xmin) &
+                                 (self.x.loc[0, :] < xmax)]
+        ySection = self.y.loc[(self.y.loc[:, 0] > ymin) &
+                              (self.y.loc[:, 0] < ymin), 0]
+        xRes = self.x.loc[ySection, xSection]
+        yRes = self.y.loc[ySection, xSection]
+        intRes = self.intensities.loc[ySection, xSection]
         return xRes, yRes, intRes
 
     def getX(self):
@@ -54,17 +64,6 @@ class dataMap():
 
     def getMapDim(self):
         return self.mapDim
-
-
-
-def subSelect(data, xmin, xmax, ymin, ymax):
-    """Takes dataFrame with X and Y columns, and sub-selects so that it only
-     contains coordinates in the specified x/y ranges"""
-    res = data.loc[(data.loc[:, 'X'] > xmin) & (data.loc[:, 'X'] < xmax), :]
-    res = res.loc[(data.loc[:, 'Y'] > ymin) & (data.loc[:, 'Y'] < ymax), :]
-    res = res.sort_values(by=['Element', 'X', 'Y'])
-    # Think there should be a line to force sorting of the matrix (ie x then y)
-    return res
 
 
 plt.ion()
