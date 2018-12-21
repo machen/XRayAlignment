@@ -20,21 +20,33 @@ class dataMap():
         It must be presorted by Y then X, and should be inputted as a dataframe
         """
         self.mapDim = [0, 0]
-        xData = inputData.loc[:, 'X'].values
+        xData = inputData.loc[:, 'X']
         xSmooth = np.round(xData, decimals=3)  # Smooth data to micron accuracy
         self.mapDim[1] = len(xSmooth.unique())
-        yData = inputData.loc[:, 'Y'].values
+        yData = inputData.loc[:, 'Y']
         ySmooth = np.round(yData, decimals=3)  # Smooth data to micron accuracy
-        intData = inputData.loc[:, "Intensity"].values
+        intData = inputData.loc[:, "Intensity"]
         self.mapDim[0] = len(ySmooth.unique())
-        self.intensities = pd.DataFrame(np.reshape(intData,
+        self.intensities = pd.DataFrame(np.reshape(intData.values,
                                         newshape=self.mapDim, order='C'))
-        self.x = pd.DataFrame(np.reshape(xSmooth, newshape=self.mapDim,
+        self.x = pd.DataFrame(np.reshape(xSmooth.values, newshape=self.mapDim,
                                          order='C'))
-        self.y = pd.DataFrame(np.reshape(ySmooth, newshape=self.mapDim,
+        self.y = pd.DataFrame(np.reshape(ySmooth.values, newshape=self.mapDim,
                                          order='C'))
         self.element = element
         self.timePoint = timePoint
+        self.xshift = 0.0
+        self.yshift = 0.0
+
+    def __repr__(self):
+        return "Timepoint: {}, Element: {}, Map Dimensions: {}".format(self.timePoint, self.element, self.mapDim)
+
+    def mapShift(self, shiftParams):
+        self.x += shiftParams[0]
+        self.y += shiftParams[1]
+        self.xshift += shiftParams[0]
+        self.yshift += shiftParams[1]
+        return
 
     def subSelect(self, xmin, xmax, ymin, ymax):
         """Function should sub-select the intensity, x, and y matrices"""
@@ -42,6 +54,8 @@ class dataMap():
                                  (self.x.loc[0, :] < xmax)]
         ySection = self.y.loc[(self.y.loc[:, 0] > ymin) &
                               (self.y.loc[:, 0] < ymin), 0]
+        if xSection.empty or ySection.empty:
+            return [], [], []
         xRes = self.x.loc[ySection, xSection]
         yRes = self.y.loc[ySection, xSection]
         intRes = self.intensities.loc[ySection, xSection]
@@ -77,6 +91,14 @@ sulfideAdjust = [-0.045, 0.01]  # Adjustment to align SulfideFlush with AsFilled
 timePoints = ["AGWRinse", "AsFilled", "SFlush"]
 availableFiles = os.listdir(dataFileLocation)
 
+data = {}
+
+# Load in data to main dictionary
+"""data is a dictionary of the collected timepoint maps,
+   with keys as the time point labels
+   Each entry then is a dictionary of the dataMap objects,
+   with the relevant element as keys"""
+
 for timePoint in timePoints:
     # Selects for files that match the region and timepoint of interest
     filePat = re.compile(".*_("+timePoint+")_("+region+")_.*_(\D{2})_Ka.dat")
@@ -88,5 +110,14 @@ for timePoint in timePoints:
                                     header=None, names=['Y', 'X', 'Intensity'],
                                     sep="\s+")
             newData.sort_values(by=['Y',  'X'])
-            element = match.group(2)
+            maps[match.group(3)] = dataMap(newData, match.group(3), timePoint)
+    data[timePoint] = maps
 
+# Apply shifts to relevant data
+for element in data['AGWRinse']:
+    data['AGWRinse'][element].mapShift(rinseAdjust)
+
+for element in data['SFlush']:
+    data['SFlush'][element].mapShift(sulfideAdjust)
+
+# Generate the relevant difference maps
