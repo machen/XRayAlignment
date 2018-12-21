@@ -16,16 +16,16 @@ class dataMap():
         yVal2 xVal2 intVal4
         yVal3 xVal2 intVal5
         yVal3 xVal2 intVal6
+
+        It must be presorted by Y then X, and should be inputted as a dataframe
         """
-        self.data = pd.DataFrame(inputData, columns=['Y', 'X', 'Intensity'])
-        self.data = self.data.sort_values(by=['Y',  'X'])
         self.mapDim = [0, 0]
-        xData = inputData[0]
+        xData = inputData.loc[:, 'X'].values
         xSmooth = np.round(xData, decimals=3)  # Smooth data to micron accuracy
         self.mapDim[1] = len(xSmooth.unique())
-        yData = inputData[1]
+        yData = inputData.loc[:, 'Y'].values
         ySmooth = np.round(yData, decimals=3)  # Smooth data to micron accuracy
-        intData = inputData[2]
+        intData = inputData.loc[:, "Intensity"].values
         self.mapDim[0] = len(ySmooth.unique())
         self.intensities = pd.DataFrame(np.reshape(intData,
                                         newshape=self.mapDim, order='C'))
@@ -76,4 +76,17 @@ rinseAdjust = [-0.03, 0.01]  # Adjustment to align AGWRinse with AsFilled [x, y]
 sulfideAdjust = [-0.045, 0.01]  # Adjustment to align SulfideFlush with AsFilled
 timePoints = ["AGWRinse", "AsFilled", "SFlush"]
 availableFiles = os.listdir(dataFileLocation)
-data = pd.DataFrame(columns=["Time Point", "Element", "X", "Y", "Intensity"])
+
+for timePoint in timePoints:
+    # Selects for files that match the region and timepoint of interest
+    filePat = re.compile(".*_("+timePoint+")_("+region+")_.*_(\D{2})_Ka.dat")
+    maps = {}
+    for name in availableFiles:
+        match = re.match(filePat, name)
+        if match:
+            newData = pd.read_table(dataFileLocation+name, skiprows=[0, 1, 2],
+                                    header=None, names=['Y', 'X', 'Intensity'],
+                                    sep="\s+")
+            newData.sort_values(by=['Y',  'X'])
+            element = match.group(2)
+
