@@ -37,6 +37,8 @@ class dataMap():
         self.timePoint = timePoint
         self.xshift = 0.0
         self.yshift = 0.0
+        self.xRng = [min(self.x), max(self.x)]
+        self.yRng = [min(self.y), max(self.y)]
 
     def __repr__(self):
         return "Timepoint: {}, Element: {}, Map Dimensions: {}".format(self.timePoint, self.element, self.mapDim)
@@ -80,6 +82,23 @@ class dataMap():
         return self.mapDim
 
 
+def mapSubtract(dataMap1, dataMap2):
+    x1 = dataMap1.getX()
+    x2 = dataMap2.getX()
+    y1 = dataMap1.getY()
+    y2 = dataMap2.getY()
+    xmin = max(min(x1), min(x2))
+    ymin = max(min(y1), min(y2))
+    xmax = min(max(x1), max(x2))
+    ymax = min(max(y1), max(y2))
+    xMatch1, yMatch1, intMatch1 = dataMap1.subSelect(xmin, xmax, ymin, ymax)
+    xMatch2, yMatch2, intMatch2 = dataMap2.subSelect(xmin, xmax, ymin, ymax)
+    if xMatch1.shape != xMatch2.shape:
+        # Need to decide how to handle if subSelect isn't working correctly, or if data has incompatible resolutions
+        return
+    return xMatch2-xMatch1, yMatch2-yMatch1, intMatch2-intMatch1
+
+
 plt.ion()
 
 # Step 1: Select the files from the region that we want to examine
@@ -121,3 +140,8 @@ for element in data['SFlush']:
     data['SFlush'][element].mapShift(sulfideAdjust)
 
 # Generate the relevant difference maps
+
+for element in data['AsFilled']:
+    fillData = data['AsFilled'][element]
+    rinseData = data['AGWRinse'][element]
+    sulfideData = data['SFlush'][element]
