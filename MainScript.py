@@ -83,14 +83,15 @@ class dataMap():
 
 
 def mapSubtract(dataMap1, dataMap2):
-    x1 = dataMap1.getX()
-    x2 = dataMap2.getX()
-    y1 = dataMap1.getY()
-    y2 = dataMap2.getY()
-    xmin = np.max(np.min(x1), np.min(x2))
-    ymin = np.max(np.min(y1), np.min(y2))
-    xmax = np.min(np.max(x1), np.max(x2))
-    ymax = np.min(np.max(y1), np.max(y2))
+    x1 = dataMap1.getX().values
+    x2 = dataMap2.getX().values
+    y1 = dataMap1.getY().values
+    y2 = dataMap2.getY().values
+    # Something wrong with how max/min is working. Check into it.
+    xmin = np.max(np.min(np.min(x1)), np.min(np.min(x2)))
+    ymin = np.max(np.min(np.min(y1)), np.min(np.min(y2)))
+    xmax = np.min(np.max(np.max(x1)), np.max(np.max(x2)))
+    ymax = np.min(np.max(np.max(y1)), np.max(np.max(y2)))
     xMatch1, yMatch1, intMatch1 = dataMap1.subSelect(xmin, xmax, ymin, ymax)
     xMatch2, yMatch2, intMatch2 = dataMap2.subSelect(xmin, xmax, ymin, ymax)
     if xMatch1.shape != xMatch2.shape:
