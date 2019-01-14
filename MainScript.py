@@ -52,10 +52,10 @@ class dataMap():
 
     def subSelect(self, xmin, xmax, ymin, ymax):
         """Function should sub-select the intensity, x, and y matrices"""
-        xSection = self.x.loc[0, (self.x.loc[0, :] > xmin) &
+        xSection = self.x.loc[:, (self.x.loc[0, :] > xmin) &
                                  (self.x.loc[0, :] < xmax)]
         ySection = self.y.loc[(self.y.loc[:, 0] > ymin) &
-                              (self.y.loc[:, 0] < ymin), 0]
+                              (self.y.loc[:, 0] < ymin), :]
         if xSection.empty or ySection.empty:
             return [], [], []
         xRes = self.x.loc[ySection, xSection]
@@ -87,10 +87,10 @@ def mapSubtract(dataMap1, dataMap2):
     x2 = dataMap2.getX()
     y1 = dataMap1.getY()
     y2 = dataMap2.getY()
-    xmin = max(min(x1), min(x2))
-    ymin = max(min(y1), min(y2))
-    xmax = min(max(x1), max(x2))
-    ymax = min(max(y1), max(y2))
+    xmin = np.max(np.min(x1), np.min(x2))
+    ymin = np.max(np.min(y1), np.min(y2))
+    xmax = np.min(np.max(x1), np.max(x2))
+    ymax = np.min(np.max(y1), np.max(y2))
     xMatch1, yMatch1, intMatch1 = dataMap1.subSelect(xmin, xmax, ymin, ymax)
     xMatch2, yMatch2, intMatch2 = dataMap2.subSelect(xmin, xmax, ymin, ymax)
     if xMatch1.shape != xMatch2.shape:
@@ -147,6 +147,14 @@ for element in data['AsFilled']:
     try:
         rinseData = data['AGWRinse'][element]
         rinseDiffX, rinseDiffY, rinseDiffInt = mapSubtract(rinseData, fillData)
+        f1 = plt.figure(2*i+1)
+        ax1 = f1.add_subplot(2, 2, [1, 2])
+        ax2 = f1.add_subplot(223)
+        ax3 = f1.add_subplot(224)
+        ax1.imshow(rinseDiffInt, cmap='RdBu', vmin=-0.003, vmax=0.003)
+        ax1.set_title('{} Change after rinsing with AGW'.format(element))
+        ax2.imshow(rinseDiffX)
+        ax3.imshow(rinseDiffY)
         # PLOT THE DIFFERNCES LABEL THE FIGURE
         # MAYBE STATS ON THE FIGURES AS WELL
     except KeyError:
@@ -156,6 +164,14 @@ for element in data['AsFilled']:
         sulfideData = data['SFlush'][element]
         sulfideDiffX, sulfideDiffY, sulfideDiffInt = mapSubtract(sulfideData,
                                                                  rinseData)
+        f2 = plt.figure(2*i+2)
+        ax1 = f2.add_subplot(2, 2, [1, 2])
+        ax2 = f2.add_subplot(223)
+        ax3 = f2.add_subplot(224)
+        ax1.imshow(rinseDiffInt, cmap='RdBu', vmin=-0.003, vmax=0.003)
+        ax1.set_title('{} Change after Addition of Sulfide'.format(element))
+        ax2.imshow(rinseDiffX)
+        ax3.imshow(rinseDiffY)
         # PLOT THE DIFFERENCES LABEL THE FIGURE
         # MAYBE STATS ON THE FIGURES AS WELL
     except KeyError:
