@@ -14,6 +14,8 @@ AsFilled: [-0.205, 4.045]
 AGWRinse: [-0.18, 4.04], Displacement: [+0.025,-0.005]
 SFlush: [-0.165, 4.035], Displacement: [+0.040, -0.01]
 
+AsFilled has two extra rows, potentially duplicates
+
 Region 2
 
 Alignment point: Top point of the complete post, darker part of bright region
@@ -21,5 +23,17 @@ Alignment point: Top point of the complete post, darker part of bright region
 AsFilled: [0.705, 1.325]
 AGWRinse: [0.735, 1.315], Displacement: [0.03, -0.01]
 SFlush: [0.75, 1.315], Displacement: [0.045, -0.01]
+
+Region 3
+
+Alignment point: Lower Right brightspot (lower level, middle pixel)
+
+AsFilled: [-2.43,-0.575]
+AGWRinse: [-2.4, -0.58], Displacement: [0.03, -0.005]
+SFlush: [-2.385, -0.585], Displacement: [0.045, -0.01]
+
+Region 4
+
+Region 5
 
 

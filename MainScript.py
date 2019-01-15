@@ -95,13 +95,16 @@ def mapSubtract(dataMap1, dataMap2):
     ymax = np.min([np.max(y1, axis=(0, 1)), np.max(y2, axis=(0, 1))])
     xMatch1, yMatch1, intMatch1 = dataMap1.subSelect(xmin, xmax, ymin, ymax)
     xMatch2, yMatch2, intMatch2 = dataMap2.subSelect(xmin, xmax, ymin, ymax)
+    import pdb; pdb.set_trace()  # breakpoint 1e985020 //
+
     if xMatch1.shape != xMatch2.shape:
         # Need to decide how to handle if subSelect isn't working correctly, or if data has incompatible resolutions
+        print([xMatch1.shape, xMatch2.shape])
         raise ValueError("The arrays are not the same shape")
-        return
     xDiff = xMatch2.values-xMatch1.values
     yDiff = yMatch2.values-yMatch1.values
     intDiff = intMatch2.values-intMatch1.values
+
     return xDiff, yDiff, intDiff
 
 
@@ -110,8 +113,8 @@ plt.ion()
 # Step 1: Select the files from the region that we want to examine
 
 dataFileLocation = """C:\\Users\\Michael\\OneDrive\\Archive\\MIT Grad School Research Overflow\\Microfluidics\\NSLS-II Data\\Kocar_NSLS-II_October15_2018_EndOfRun\\01010_Kocar\\Maps\\Exported Data\\Device 6G Normalized by I0\\"""
-region = "Region2"  # CHANGE THIS
-rinseAdjust = [-0.03, 0.01]  # Adjustment to align AGWRinse with AsFilled [x, y] in mm
+region = "Region3"  # CHANGE THIS
+rinseAdjust = [-0.03, 0.005]  # Adjustment to align AGWRinse with AsFilled [x, y] in mm
 sulfideAdjust = [-0.045, 0.01]  # Adjustment to align SulfideFlush with AsFilled
 timePoints = ["AGWRinse", "AsFilled", "SFlush"]
 availableFiles = os.listdir(dataFileLocation)
@@ -152,28 +155,28 @@ i = 0
 for element in data['AsFilled']:
     fillData = data['AsFilled'][element]
     rinseData = data['AGWRinse'][element]
-    rinseDiffX, rinseDiffY, rinseDiffInt = mapSubtract(rinseData, fillData)
+    rinseDiffX, rinseDiffY, rinseDiffInt = mapSubtract(fillData, rinseData)
     f1 = plt.figure(2*i+1)
-    ax1 = f1.add_subplot(2, 2, 1)
-    ax2 = f1.add_subplot(2, 2, 3)
+    ax1 = f1.add_subplot(1, 2, 1)
+    ax2 = f1.add_subplot(2, 2, 2)
     ax3 = f1.add_subplot(2, 2, 4)
     ax1.imshow(rinseDiffInt, cmap='RdBu', vmin=-0.001, vmax=0.001)
     ax1.set_title('{} Change after rinsing with AGW'.format(element))
-    ax2.imshow(rinseDiffX, cmap='RdBu', vmin=-1, vmax=1)
-    ax3.imshow(rinseDiffY, cmap='RdBu', vmin=-1, vmax=1)
+    ax2.imshow(rinseDiffX, cmap='RdBu', vmin=-0.001, vmax=0.001)
+    ax3.imshow(rinseDiffY, cmap='RdBu', vmin=-0.001, vmax=0.001)
     # PLOT THE DIFFERNCES LABEL THE FIGURE
     # MAYBE STATS ON THE FIGURES AS WELL
     sulfideData = data['SFlush'][element]
-    sulfideDiffX, sulfideDiffY, sulfideDiffInt = mapSubtract(sulfideData,
-                                                             rinseData)
+    sulfideDiffX, sulfideDiffY, sulfideDiffInt = mapSubtract(rinseData,
+                                                             sulfideData)
     f2 = plt.figure(2*i+2)
-    ax1 = f2.add_subplot(2, 2, 1)
-    ax2 = f2.add_subplot(223)
+    ax1 = f2.add_subplot(1, 2, 1)
+    ax2 = f2.add_subplot(222)
     ax3 = f2.add_subplot(224)
-    ax1.imshow(rinseDiffInt, cmap='RdBu', vmin=-0.001, vmax=0.001)
+    ax1.imshow(sulfideDiffInt, cmap='RdBu', vmin=-0.001, vmax=0.001)
     ax1.set_title('{} Change after Addition of Sulfide'.format(element))
-    ax2.imshow(rinseDiffX, cmap='RdBu', vmin=-1, vmax=1)
-    ax3.imshow(rinseDiffY, cmap='RdBu', vmin=-1, vmax=1)
+    ax2.imshow(sulfideDiffX, cmap='RdBu', vmin=-0.001, vmax=0.001)
+    ax3.imshow(sulfideDiffY, cmap='RdBu', vmin=-0.001, vmax=0.001)
     # PLOT THE DIFFERENCES LABEL THE FIGURE
     # MAYBE STATS ON THE FIGURES AS WELL
     i+=1
