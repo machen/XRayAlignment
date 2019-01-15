@@ -99,7 +99,10 @@ def mapSubtract(dataMap1, dataMap2):
         # Need to decide how to handle if subSelect isn't working correctly, or if data has incompatible resolutions
         raise ValueError("The arrays are not the same shape")
         return
-    return xMatch2-xMatch1, yMatch2-yMatch1, intMatch2-intMatch1
+    xDiff = xMatch2.values-xMatch1.values
+    yDiff = yMatch2.values-yMatch1.values
+    intDiff = intMatch2.values-intMatch1.values
+    return xDiff, yDiff, intDiff
 
 
 plt.ion()
@@ -108,8 +111,8 @@ plt.ion()
 
 dataFileLocation = """C:\\Users\\Michael\\OneDrive\\Archive\\MIT Grad School Research Overflow\\Microfluidics\\NSLS-II Data\\Kocar_NSLS-II_October15_2018_EndOfRun\\01010_Kocar\\Maps\\Exported Data\\Device 6G Normalized by I0\\"""
 region = "Region2"  # CHANGE THIS
-rinseAdjust = [0.03, -0.01]  # Adjustment to align AGWRinse with AsFilled [x, y] in mm
-sulfideAdjust = [0.045, -0.01]  # Adjustment to align SulfideFlush with AsFilled
+rinseAdjust = [-0.03, 0.01]  # Adjustment to align AGWRinse with AsFilled [x, y] in mm
+sulfideAdjust = [-0.045, 0.01]  # Adjustment to align SulfideFlush with AsFilled
 timePoints = ["AGWRinse", "AsFilled", "SFlush"]
 availableFiles = os.listdir(dataFileLocation)
 
@@ -154,10 +157,10 @@ for element in data['AsFilled']:
     ax1 = f1.add_subplot(2, 2, 1)
     ax2 = f1.add_subplot(2, 2, 3)
     ax3 = f1.add_subplot(2, 2, 4)
-    ax1.imshow(rinseDiffInt, cmap='RdBu', vmin=-0.003, vmax=0.003)
+    ax1.imshow(rinseDiffInt, cmap='RdBu', vmin=-0.001, vmax=0.001)
     ax1.set_title('{} Change after rinsing with AGW'.format(element))
-    ax2.imshow(rinseDiffX, cmap='RdBu')
-    ax3.imshow(rinseDiffY, cmap='RdBu')
+    ax2.imshow(rinseDiffX, cmap='RdBu', vmin=-1, vmax=1)
+    ax3.imshow(rinseDiffY, cmap='RdBu', vmin=-1, vmax=1)
     # PLOT THE DIFFERNCES LABEL THE FIGURE
     # MAYBE STATS ON THE FIGURES AS WELL
     sulfideData = data['SFlush'][element]
@@ -167,10 +170,10 @@ for element in data['AsFilled']:
     ax1 = f2.add_subplot(2, 2, 1)
     ax2 = f2.add_subplot(223)
     ax3 = f2.add_subplot(224)
-    ax1.imshow(rinseDiffInt, cmap='RdBu', vmin=-0.003, vmax=0.003)
+    ax1.imshow(rinseDiffInt, cmap='RdBu', vmin=-0.001, vmax=0.001)
     ax1.set_title('{} Change after Addition of Sulfide'.format(element))
-    ax2.imshow(rinseDiffX, cmap='RdBu')
-    ax3.imshow(rinseDiffY, cmap='RdBu')
+    ax2.imshow(rinseDiffX, cmap='RdBu', vmin=-1, vmax=1)
+    ax3.imshow(rinseDiffY, cmap='RdBu', vmin=-1, vmax=1)
     # PLOT THE DIFFERENCES LABEL THE FIGURE
     # MAYBE STATS ON THE FIGURES AS WELL
     i+=1
