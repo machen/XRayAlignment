@@ -19,7 +19,7 @@ plt.ion()
 
 # Step 1: Select the files from the region that we want to examine
 
-dataFileLocation = """C:\\Users\\Michael\\OneDrive\\Archive\\MIT Grad School Research Overflow\\Microfluidics\\NSLS-II Data\\Kocar_NSLS-II_October15_2018_EndOfRun\\01010_Kocar\\Maps\\Exported Data\\Device 6G Normalized by I0\\"""
+dataFileLocation = """F:\\OneDrive\\Documents\\MIT Graduate Work\\Research\\Microfluidics\\Results\\NSLS-II Data\\Kocar_NSLS-II_October15_2018_EndOfRun\\01010_Kocar\\Maps\\Exported Data\\Device 6G Normalized by I0\\"""
 region = "Region4"  # CHANGE THIS
 rinseAdjust = [0.03, -0.005]  # Adjustment to align AGWRinse with AsFilled [x, y] in mm
 sulfideAdjust = [0.04, -0.01]  # Adjustment to align SulfideFlush with AsFilled
@@ -131,6 +131,8 @@ for i in fillingData.index:
 difference = pd.DataFrame(differenceMat, columns=["X", "Y", "FillingRinse",
                           "RinseSulfide", "Element", "FillInt", "RinseInt",
                           "SulfideInt"])
+
+difference.to_csv(dataFileLocation+"DifferenceMatrix_{}.csv".format(region))
 
 # Plot the differences by element/time points
 
